@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "OnlySale",
-  "version": "1.0.0",
-  "description": "Show only the products on sale within the discount range you choose. Works on Rohlik, Košík and Alza.",
+  "version": "1.0.1",
+  "description": "Hide everything that is not on sale. Choose a discount range and see only the products inside it on supported online shops.",
   "icons": {
     "16": "icons/OnlySale_icon_16.png",
     "32": "icons/OnlySale_icon_32.png",

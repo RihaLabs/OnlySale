@@ -5,7 +5,7 @@
 **Language:** English (optionally add Czech)
 
 ## Short description (Chrome limit 132 chars / Firefox summary limit 250)
-Show only the products on sale within the discount range you choose. Works on Rohlík, Košík and Alza.
+Hide everything that is not on sale. Choose a discount range and see only the products inside it on supported online shops.
 
 ## Detailed description
 OnlySale hides everything that is not on sale, so you can browse only the deals you care about.
@@ -13,11 +13,11 @@ OnlySale hides everything that is not on sale, so you can browse only the deals 
 Open the panel with the toolbar button, then drag the two handles or click the percentage boxes to set a range, for example "30 % to 100 %". Only products with a discount inside that range stay on the page. Products without a sale count as 0 %.
 
 • Works with endless scrolling and pages that reload their content
-• Uses the biggest discount found on each product (old price, printed percent, multi-buy, member and code prices on Alza)
+• Uses the biggest discount found on each product (old price, printed percent, multi-buy, member and code prices)
 • Light and dark mode
 • Free, open source, no tracking, no data collected
 
-Supported shops: Rohlík, Kifli, Gurkerl, Knuspr, Sezamo, Košík, Alza (all country versions). More shops are coming.
+It works on a selected set of online shops, and more are being added. The current list is on the project page.
 
 Source code: https://github.com/RihaLabs/OnlySale
 Website: https://rihalabs.github.io/onlysale/
@@ -41,3 +41,6 @@ Register for free at Partner Center (Microsoft Edge program), upload the **same 
 
 ## Ready-made screenshots
 `store/screenshots/` holds two 1280×800 images (light and dark) that fit the Chrome and Edge size requirement. Better still: add one real screenshot of the panel on a shop page (crop or resize to 1280×800).
+
+## Rule for all store texts
+Do not list shop or brand names in any store text (name, summary, description, screenshots). Chrome treats that as keyword spam. Say "supported online shops" and point to the project page, where the list lives.
