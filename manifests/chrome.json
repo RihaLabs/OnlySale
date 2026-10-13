@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "OnlySale",
+  "version": "1.0.0",
+  "description": "Show only the products on sale within the discount range you choose. Works on Rohlik, Košík and Alza.",
+  "icons": {
+    "16": "icons/OnlySale_icon_16.png",
+    "32": "icons/OnlySale_icon_32.png",
+    "48": "icons/OnlySale_icon_48.png",
+    "128": "icons/OnlySale_icon_128.png"
+  },
+  "action": {
+    "default_title": "OnlySale",
+    "default_icon": {
+      "16": "icons/OnlySale_icon_16.png",
+      "32": "icons/OnlySale_icon_32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.rohlik.cz/*",
+        "*://*.kifli.hu/*",
+        "*://*.gurkerl.at/*",
+        "*://*.knuspr.de/*",
+        "*://*.sezamo.ro/*",
+        "*://*.sezamo.it/*",
+        "*://*.kosik.cz/*",
+        "*://*.alza.cz/*",
+        "*://*.alza.sk/*",
+        "*://*.alza.hu/*",
+        "*://*.alza.de/*",
+        "*://*.alza.at/*"
+      ],
+      "js": [
+        "sites/common.js",
+        "sites/rohlik.js",
+        "sites/kosik.js",
+        "sites/alza.js",
+        "core.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "homepage_url": "https://rihalabs.github.io/onlysale/"
+}

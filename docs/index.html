@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OnlySale – show only what's on sale</title>
+<meta name="description" content="OnlySale is a free, open-source browser extension that hides everything except the products inside the discount range you choose. Works on Rohlík, Košík and Alza.">
+<meta property="og:title" content="OnlySale – show only what's on sale">
+<meta property="og:description" content="Pick a discount range, hide everything else. Free and open source.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon-48.png" type="image/png">
+<style>
+:root{--bg:#fff7fb;--card:#fff;--text:#2B0018;--muted:#5E0034;--rail:#ecdfe7;--hover:#fde6f2;--border:#5E0034;--accent:#FF038F;--logo-bg:transparent;--line:rgba(94,0,52,.14);--shadow:0 8px 28px rgba(43,0,24,.2),0 0 0 1px rgba(94,0,52,.12)}
+:root[data-theme=dark]{--bg:#170a11;--card:#26121d;--text:#fbeaf3;--muted:#e9b4d0;--rail:#4b2c3c;--hover:rgba(255,3,143,.22);--border:#c0608e;--logo-bg:#f6e6ef;--line:rgba(255,255,255,.12);--shadow:0 8px 28px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.1)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(900px 500px at 50% -10%,rgba(255,3,143,.14),transparent) no-repeat fixed,var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .25s,color .25s}
+.page{min-height:100%;display:flex;flex-direction:column;padding:clamp(16px,3vh,32px) clamp(16px,4vw,56px)}
+main{flex:1;display:grid;grid-template-columns:1fr;gap:28px;align-items:center;min-height:0}
+.logo{width:clamp(72px,11vh,104px);height:auto;padding:clamp(6px,1.1vh,10px);border-radius:22%;background:var(--logo-bg)}
+h1{font-size:clamp(46px,5.6vw,80px);line-height:1.03;margin:16px 0 12px;font-weight:800;letter-spacing:-.8px}
+h1 span{color:var(--accent)}
+.lead{color:var(--muted);font-size:clamp(18px,1.7vw,23px);line-height:1.4;margin:0 0 24px;max-width:21em}
+.btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(100%,440px)}
+.btn{text-align:left;display:flex;align-items:center;gap:9px;min-height:56px;padding:0 10px 0 12px;border-radius:12px;background:#fff;color:#202124;border:1px solid #dadce0;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.08);transition:transform .15s,box-shadow .15s,opacity .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.16)}
+.btn img{width:28px;height:28px;flex:none;object-fit:contain}
+.btn small{display:block;white-space:nowrap;font-size:10.5px;color:#5f6368;line-height:1.15}
+.btn b{display:block;font-size:14px;line-height:1.2;white-space:nowrap}
+.btn.soon{opacity:.6;pointer-events:none}
+.demo{display:flex;justify-content:center}
+.panel{width:340px;padding:16px 18px 18px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);font-size:14px;line-height:1.3;transition:background .25s}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:4px;font-weight:800;font-size:17px}
+.brand .pl{width:34px;height:34px;padding:4px;object-fit:contain;border-radius:10px;background:var(--logo-bg)}
+.brand .version{align-self:flex-end;margin-bottom:4px;font-weight:600;font-size:11px;color:var(--muted)}
+.buttons{display:flex;gap:2px}
+.icon-btn{all:unset;box-sizing:border-box;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.icon-btn:hover{background:var(--hover)}
+.icon-btn:focus-visible,.step:focus-visible{outline:2px solid var(--accent)}
+.icon-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:root[data-theme=dark] .sun,:root:not([data-theme=dark]) .moon{display:none}
+.values{display:flex;align-items:flex-end;gap:8px;margin-bottom:8px}
+.box{flex:1;text-align:center}
+.box label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px}
+.num{position:relative;border:2px solid var(--border);border-radius:10px;padding:6px 0;font-size:20px;font-weight:800;background:var(--card)}
+.num span{color:var(--accent)}
+.step{all:unset;position:absolute;top:0;bottom:0;width:50%;cursor:pointer}
+.step.d{left:0}.step.u{right:0}
+.dash{padding-bottom:10px;color:var(--muted);font-weight:700}
+.slider{position:relative;height:28px;margin-top:6px}
+.rail{position:absolute;left:11px;right:11px;top:50%;height:6px;margin-top:-3px;background:var(--rail);border-radius:3px}
+.fill{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:3px}
+input[type=range]{-webkit-appearance:none;appearance:none;background:none;pointer-events:none;position:absolute;left:0;top:0;width:100%;height:28px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{background:none}
+input[type=range]::-moz-range-track{background:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;cursor:grab;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.35)}
+input[type=range]::-moz-range-thumb{pointer-events:auto;cursor:grab;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.scale{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px;padding:0 4px}
+.made{display:flex;align-items:center;gap:4px;font-size:10px}
+.made svg{height:11px;width:auto;fill:none;stroke:currentColor;stroke-width:40;stroke-linecap:round}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin:14px 0 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:clamp(104px,17vh,160px);gap:12px;align-content:center}
+.p{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;animation:pop .25s}
+.p[hidden]{display:none}
+@keyframes pop{from{opacity:0;transform:scale(.94)}}
+.p .img{flex:1;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,5vh,48px);min-height:0}
+.p .n{font-size:13px;font-weight:600}
+.p .pr{font-size:14px;font-weight:800}
+.p .pr s{font-weight:500;font-size:12px;color:var(--muted);margin-left:6px}
+.p .tag{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:2px 7px;border-radius:8px}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);align-self:center}
+footer{padding-top:clamp(10px,2vh,22px);text-align:center;color:var(--muted);font-size:13px;line-height:1.7;opacity:.75}
+footer p{margin:0 auto;max-width:880px}
+footer p{font-style:italic}
+footer .shops{font-style:normal}
+footer a{color:inherit;text-decoration:none;white-space:nowrap}
+footer a:hover{text-decoration:underline}
+footer a:not(:last-child)::after{content:" ·";margin:0 .2em 0 .1em}
+@media(min-width:960px) and (min-height:700px){
+  body{overflow:hidden}.page{height:100%}
+  main{grid-template-columns:minmax(0,1fr) 340px minmax(0,1fr);column-gap:clamp(32px,4.5vw,80px);width:100%;max-width:1560px;margin:0 auto}
+  .intro{display:flex;flex-direction:column;align-items:flex-end;text-align:right}
+  .intro .btns{margin-left:auto}
+  .lead{margin-left:auto}
+  .grid{max-width:600px}
+}
+@media(max-width:959px),(max-height:699px){.intro{display:flex;flex-direction:column;align-items:center;text-align:center}.intro .btns{margin:0 auto;width:min(100%,360px)}.lead{margin-inline:auto}.grid{grid-auto-rows:120px;max-width:640px;margin:0 auto}.demo{padding:8px 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+<main>
+  <section class="intro">
+    <img class="logo" src="assets/icon-128.png" width="128" height="128" alt="OnlySale logo">
+    <h1>Only<span>Sale</span></h1>
+    <p class="lead">Show only what's on sale. Pick a discount range and hide everything else, on your favourite shops. Free and open source.</p>
+    <div class="btns">
+      <a class="btn soon" id="chrome" href="#" target="_blank" rel="noopener"><img src="assets/logo-chrome.svg" alt=""><span><small>Available in the</small><b>Chrome Web Store</b></span></a>
+      <a class="btn soon" id="firefox" href="#" target="_blank" rel="noopener"><img src="assets/logo-firefox.svg" alt=""><span><small>Get the add-on for</small><b>Firefox</b></span></a>
+      <a class="btn soon" id="edge" href="#" target="_blank" rel="noopener"><img src="assets/logo-edge.svg" alt=""><span><small>Get it from Microsoft</small><b>Edge Add-ons</b></span></a>
+      <a class="btn" id="github" href="https://github.com/RihaLabs/OnlySale" target="_blank" rel="noopener"><img src="assets/logo-github.svg" alt=""><span><small>View on</small><b>GitHub</b></span></a>
+    </div>
+  </section>
+
+  <section class="demo">
+    <div>
+      <div class="panel" role="group" aria-label="OnlySale demo">
+        <div class="head">
+          <div class="brand"><img class="pl" src="assets/icon-48.png" width="48" height="48" alt=""><span>OnlySale</span><span class="version">v1.0.0</span></div>
+          <div class="buttons">
+            <button class="icon-btn" id="theme" aria-label="Switch light / dark mode" title="Switch light / dark mode"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+          </div>
+        </div>
+        <div class="values">
+          <div class="box"><label>From</label><div class="num"><b id="lov">0</b><span> %</span><button class="step d" data-s="lo-" title="Previous 10" aria-label="Minimum: previous 10"></button><button class="step u" data-s="lo+" title="Next 10" aria-label="Minimum: next 10"></button></div></div>
+          <div class="dash">&ndash;</div>
+          <div class="box"><label>To</label><div class="num"><b id="hiv">100</b><span> %</span><button class="step d" data-s="hi-" title="Previous 10" aria-label="Maximum: previous 10"></button><button class="step u" data-s="hi+" title="Next 10" aria-label="Maximum: next 10"></button></div></div>
+        </div>
+        <div class="slider"><div class="rail"><div class="fill" id="fill"></div></div>
+          <input id="lo" type="range" min="0" max="100" value="0" aria-label="Minimum discount"><input id="hi" type="range" min="0" max="100" value="100" aria-label="Maximum discount"></div>
+        <div class="scale"><span>0 %</span><span class="made">Manufactured by <svg role="img" aria-label="RihaLabs" viewBox="0 0 1190 190"><path d="M120 170H45C31.1929 170 20 158.807 20 145C20 131.193 31.1929 120 45 120H120C147.614 120 170 97.6142 170 70C170 42.3858 147.614 20 120 20H20"/><path d="M220 20V170"/><path d="M570 170L495.894 21.7889C495.526 21.0518 494.474 21.0518 494.106 21.7889L420 170"/><path d="M720 170H695C653.579 170 620 136.421 620 95V20"/><path d="M920 170H995C1008.81 170 1020 158.807 1020 145C1020 131.193 1008.81 120 995 120H895C881.193 120 870 108.807 870 95C870 81.1929 881.193 70 895 70H945C958.807 70 970 58.8071 970 45C970 31.1929 958.807 20 945 20H820"/><path d="M1070 170H1120C1147.61 170 1170 147.614 1170 120C1170 92.3858 1147.61 70 1120 70H1045C1031.19 70 1020 58.8071 1020 45C1020 31.1929 1031.19 20 1045 20H1120"/><path d="M820 170L745.894 21.7889C745.526 21.0518 744.474 21.0518 744.106 21.7889L707.5 95"/><path d="M270 20V95V145C270 158.807 281.193 170 295 170C308.807 170 320 158.807 320 145V120C320 106.193 331.193 95 345 95H370C397.614 95 420 72.6142 420 45V20"/></svg></span><span>100 %</span></div>
+      </div>
+      <p class="hint">👆 Try it, this is the real thing</p>
+    </div>
+  </section>
+
+  <section><div class="grid" id="grid" aria-live="polite"></div></section>
+</main>
+<footer>
+  <p>Works on</p>
+  <p class="shops"><a href="https://rohlik.cz" target="_blank" rel="noopener">rohlik.cz</a> <a href="https://kifli.hu" target="_blank" rel="noopener">kifli.hu</a> <a href="https://gurkerl.at" target="_blank" rel="noopener">gurkerl.at</a> <a href="https://knuspr.de" target="_blank" rel="noopener">knuspr.de</a> <a href="https://sezamo.ro" target="_blank" rel="noopener">sezamo.ro</a> <a href="https://sezamo.it" target="_blank" rel="noopener">sezamo.it</a> <a href="https://kosik.cz" target="_blank" rel="noopener">kosik.cz</a> <a href="https://alza.cz" target="_blank" rel="noopener">alza.cz</a> <a href="https://alza.sk" target="_blank" rel="noopener">alza.sk</a> <a href="https://alza.hu" target="_blank" rel="noopener">alza.hu</a> <a href="https://alza.de" target="_blank" rel="noopener">alza.de</a> <a href="https://alza.at" target="_blank" rel="noopener">alza.at</a></p>
+  <p>More shops are on the way.</p>
+</footer>
+</div>
+<script>
+// Store links: put the real URLs here once the extension is published (empty = "coming soon" look).
+var LINKS={chrome:"",firefox:"",edge:""};
+for(var k in LINKS){var a=document.getElementById(k);if(LINKS[k]){a.href=LINKS[k];a.classList.remove("soon")}}
+
+// ---- demo products (pct = printed discount, 0 = not on sale) ----
+var P=[["🍓","Strawberries 500 g",99,40],["🥛","Fresh milk 1 l",30,10],["🧀","Gouda 300 g",80,25],["🍞","Sourdough bread",60,0],["🥑","Avocado 2 pcs",70,30],["☕","Coffee beans 1 kg",400,50],["🍝","Pasta 500 g",50,15],["🍫","Dark chocolate",40,20],["🧃","Orange juice 1 l",60,60]];
+var grid=document.getElementById("grid");
+grid.innerHTML=P.map(function(p){var n=Math.round(p[2]*(1-p[3]/100));
+ return '<div class="p"><div class="img">'+p[0]+'</div><div class="n">'+p[1]+'</div><div class="pr">'+(p[3]?n+' Kč<s>'+p[2]+'</s>':p[2]+' Kč')+'</div>'+(p[3]?'<span class="tag">-'+p[3]+' %</span>':'')+'</div>'}).join("")+'<div class="empty" id="empty" hidden>No products in this range</div>';
+var cards=grid.querySelectorAll(".p");
+
+// ---- same logic as the extension (src/core.js) ----
+var s={min:0,max:100},$=function(i){return document.getElementById(i)};
+var clamp=function(n){return Math.max(0,Math.min(100,Math.round(+n)||0))};
+var down=function(v){return v%10===0?v-10:Math.floor(v/10)*10},up=function(v){return v%10===0?v+10:Math.ceil(v/10)*10};
+function setMin(v){s.min=clamp(v);if(s.min>s.max)s.max=s.min;draw()}
+function setMax(v){s.max=clamp(v);if(s.max<s.min)s.min=s.max;draw()}
+function draw(){
+ $("lo").value=s.min;$("hi").value=s.max;$("lov").textContent=s.min;$("hiv").textContent=s.max;
+ $("fill").style.left=s.min+"%";$("fill").style.right=100-s.max+"%";
+ $("lo").style.zIndex=s.min>50?4:2;$("hi").style.zIndex=3;
+ var shown=0;
+ cards.forEach(function(c,i){var ok=P[i][3]>=s.min&&P[i][3]<=s.max;
+  if(c.hidden&&ok){c.style.animation="none";c.offsetWidth;c.style.animation=""}
+  c.hidden=!ok;if(ok)shown++});
+ $("empty").hidden=shown>0}
+$("lo").oninput=function(e){setMin(e.target.value)};
+$("hi").oninput=function(e){setMax(e.target.value)};
+document.querySelectorAll(".step").forEach(function(b){b.onclick=function(){
+ var m={"lo-":function(){setMin(down(s.min))},"lo+":function(){setMin(up(s.min))},"hi-":function(){setMax(down(s.max))},"hi+":function(){setMax(up(s.max))}};m[b.dataset.s]()}});
+
+// ---- theme: follows the browser, the sun/moon button switches the whole page ----
+var root=document.documentElement,mq=matchMedia("(prefers-color-scheme: dark)");
+root.dataset.theme=mq.matches?"dark":"light";
+$("theme").onclick=function(){root.dataset.theme=root.dataset.theme==="dark"?"light":"dark"};
+draw();
+</script>
+</body>
+</html>
